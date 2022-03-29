@@ -41,7 +41,7 @@ pub fn caller_contract_id() -> ContractId {
     })
 }
 
-/// A wrapper for ec-recover_address which is aware of the parent context and returns the appropriate result accordingly.
+/// A wrapper for ec_recover_address which is aware of the parent context and returns the appropriate result accordingly.
 /// Returns Result::Error(InternalContextError) if the parent context is internal, otherwise returns a Result::Ok(Address) or Result::Error(EcRecoverError)
 pub fn get_signer(signature: B512, msg_hash: b256) -> Result<Address, AuthError> {
    if !caller_is_external() {
