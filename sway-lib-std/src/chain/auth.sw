@@ -5,12 +5,16 @@ use ::address::Address;
 use ::assert::assert;
 use ::b512::B512;
 use ::contract_id::ContractId;
+use ::ecr::ec_recover_address;
 use ::option::*;
 use ::result::Result;
 use ::tx::*;
 
 pub enum AuthError {
     InputsNotAllOwnedBySameAddress: (),
+    InternalContextError: (),
+    EcRecoverError: (),
+
 }
 
 pub enum Sender {
@@ -35,6 +39,21 @@ pub fn caller_contract_id() -> ContractId {
         gm r1 i2;
         r1: b256
     })
+}
+
+/// A wrapper for ec-recover_address which is aware of the parent context and returns the appropriate result accordingly.
+/// Returns Result::Error(InternalContextError) if the parent context is internal, otherwise returns a Result::Ok(Address) or Result::Error(EcRecoverError)
+pub fn get_signer(signature: B512, msg_hash: b256) -> Result<Address, AuthError> {
+   if !caller_is_external() {
+        Result::Err(AuthError::InternalContextError)
+    } else {
+        let result = ec_recover_address(signature, msg_hash);
+        if let Result::Err(e) = result {
+            Result::Err(AuthError::EcRecoverError)
+        } else {
+            result
+        }
+    }
 }
 
 /// Get the `Sender` (i.e. `Address` or `ContractId`) from which a call was made.
