@@ -26,9 +26,8 @@ async fn get_call_frames_instance() -> (CallFramesTestContract, ContractId) {
 #[tokio::test]
 async fn can_get_contract_id() {
     let (instance, id) = get_call_frames_instance().await;
-    let c = callframestestcontract_mod::ContractId { value: id.into() };
     let result = instance.get_id().call().await.unwrap();
-    assert_eq!(result.value, c);
+    assert_eq!(result.value, id);
 }
 
 #[tokio::test]

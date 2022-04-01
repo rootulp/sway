@@ -26,11 +26,9 @@ async fn is_external_from_sdk() {
 #[tokio::test]
 async fn msg_sender_from_sdk() {
     let (auth_instance, _, _, _, wallet) = get_contracts().await;
-    let addr = authcontract_mod::Address {
-        value: wallet.address().into(),
-    };
+
     let result = auth_instance
-        .returns_msg_sender_address(addr)
+        .returns_msg_sender_address(wallet.address())
         .call()
         .await
         .unwrap();
@@ -42,16 +40,8 @@ async fn msg_sender_from_sdk() {
 async fn msg_sender_from_contract() {
     let (_, auth_id, caller_instance, caller_id, _) = get_contracts().await;
 
-    let caller_sway_id = authcallercontract_mod::ContractId {
-        value: caller_id.into(),
-    };
-
-    let auth_sway_id = authcallercontract_mod::ContractId {
-        value: auth_id.into(),
-    };
-
     let result = caller_instance
-        .call_auth_contract(auth_sway_id, caller_sway_id)
+        .call_auth_contract(auth_id, caller_id)
         .set_contracts(&[auth_id])
         .call()
         .await

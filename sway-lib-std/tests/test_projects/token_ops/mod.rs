@@ -15,13 +15,8 @@ async fn can_mint() {
     let (provider, wallet) = setup_test_provider_and_wallet().await;
     let (fuelcoin_instance, fuelcoin_id) = get_fuelcoin_instance(provider, wallet).await;
 
-    let target = testfuelcoincontract_mod::ContractId {
-        value: fuelcoin_id.into(),
-    };
-    let asset_id = target.clone();
-
     let mut balance_result = fuelcoin_instance
-        .get_balance(target.clone(), asset_id.clone())
+        .get_balance(fuelcoin_id.clone(), fuelcoin_id.clone())
         .call()
         .await
         .unwrap();
@@ -30,7 +25,7 @@ async fn can_mint() {
     fuelcoin_instance.mint_coins(11).call().await.unwrap();
 
     balance_result = fuelcoin_instance
-        .get_balance(target, asset_id)
+        .get_balance(fuelcoin_id, fuelcoin_id)
         .call()
         .await
         .unwrap();
@@ -42,13 +37,8 @@ async fn can_burn() {
     let (provider, wallet) = setup_test_provider_and_wallet().await;
     let (fuelcoin_instance, fuelcoin_id) = get_fuelcoin_instance(provider, wallet).await;
 
-    let target = testfuelcoincontract_mod::ContractId {
-        value: fuelcoin_id.into(),
-    };
-    let asset_id = target.clone();
-
     let mut balance_result = fuelcoin_instance
-        .get_balance(target.clone(), asset_id.clone())
+        .get_balance(fuelcoin_id.clone(), fuelcoin_id.clone())
         .call()
         .await
         .unwrap();
@@ -58,7 +48,7 @@ async fn can_burn() {
     fuelcoin_instance.burn_coins(7).call().await.unwrap();
 
     balance_result = fuelcoin_instance
-        .get_balance(target, asset_id)
+        .get_balance(fuelcoin_id, fuelcoin_id)
         .call()
         .await
         .unwrap();
@@ -72,16 +62,8 @@ async fn can_force_transfer() {
         get_fuelcoin_instance(provider.clone(), wallet.clone()).await;
     let balance_id = get_balance_contract_id(provider, wallet).await;
 
-    let asset_id = testfuelcoincontract_mod::ContractId {
-        value: fuelcoin_id.into(),
-    };
-
-    let target = testfuelcoincontract_mod::ContractId {
-        value: balance_id.into(),
-    };
-
     let mut balance_result = fuelcoin_instance
-        .get_balance(asset_id.clone(), asset_id.clone())
+        .get_balance(fuelcoin_id.clone(), fuelcoin_id.clone())
         .call()
         .await
         .unwrap();
@@ -90,7 +72,7 @@ async fn can_force_transfer() {
     fuelcoin_instance.mint_coins(100).call().await.unwrap();
 
     balance_result = fuelcoin_instance
-        .get_balance(asset_id.clone(), asset_id.clone())
+        .get_balance(fuelcoin_id.clone(), fuelcoin_id.clone())
         .call()
         .await
         .unwrap();
@@ -98,7 +80,7 @@ async fn can_force_transfer() {
 
     // confirm initial balance on balance contract (recipient)
     balance_result = fuelcoin_instance
-        .get_balance(asset_id.clone(), target.clone())
+        .get_balance(fuelcoin_id.clone(), balance_id.clone())
         .set_contracts(&[balance_id])
         .call()
         .await
@@ -108,7 +90,7 @@ async fn can_force_transfer() {
     let coins = 42u64;
 
     fuelcoin_instance
-        .force_transfer_coins(coins, asset_id.clone(), target.clone())
+        .force_transfer_coins(coins, fuelcoin_id.clone(), balance_id.clone())
         .set_contracts(&[fuelcoin_id, balance_id])
         .call()
         .await
@@ -116,7 +98,7 @@ async fn can_force_transfer() {
 
     // confirm remaining balance on fuelcoin contract
     balance_result = fuelcoin_instance
-        .get_balance(asset_id.clone(), asset_id.clone())
+        .get_balance(fuelcoin_id.clone(), fuelcoin_id.clone())
         .call()
         .await
         .unwrap();
@@ -124,7 +106,7 @@ async fn can_force_transfer() {
 
     // confirm new balance on balance contract (recipient)
     balance_result = fuelcoin_instance
-        .get_balance(asset_id.clone(), target.clone())
+        .get_balance(fuelcoin_id.clone(), balance_id.clone())
         .set_contracts(&[balance_id])
         .call()
         .await
