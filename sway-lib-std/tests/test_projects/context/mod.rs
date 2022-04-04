@@ -60,8 +60,8 @@ async fn can_get_this_balance() {
         .unwrap();
 
     // TEMPORARILY DISABLED until https://github.com/FuelLabs/fuels-rs/issues/201 is resolved.
-    //caller_instance
-    //    .call_receive_coins(send_amount, context_sway_id)
+    // caller_instance
+    //    .call_receive_coins(send_amount, context_id)
     //    .set_contracts(&[context_id])
     //    .tx_params(TxParameters::new(None, Some(1_000_000), None))
     //    .call()
@@ -73,7 +73,6 @@ async fn can_get_this_balance() {
         .call()
         .await
         .unwrap();
-    dbg!(&result);
 
     // TEMPORARILY DISABLED until https://github.com/FuelLabs/fuels-rs/issues/201 is resolved.
     //assert_eq!(result.value, send_amount);
