@@ -21,12 +21,8 @@ async fn can_detect_reentrancy() {
     let (attacker_instance, _) = get_attacker_instance(provider.clone(), wallet.clone()).await;
     let (_, target_id) = get_target_instance(provider, wallet).await;
 
-    let sway_target_id = attackercontract_mod::ContractId {
-        value: target_id.into(),
-    };
-
     let result = attacker_instance
-        .launch_attack(sway_target_id)
+        .launch_attack(target_id)
         .set_contracts(&[target_id])
         .tx_params(TxParameters::new(Some(0), Some(MAX_GAS_PER_TX), None))
         .call()
@@ -43,12 +39,8 @@ async fn can_block_reentrancy() {
     let (attacker_instance, _) = get_attacker_instance(provider.clone(), wallet.clone()).await;
     let (_, target_id) = get_target_instance(provider, wallet).await;
 
-    let sway_target_id = attackercontract_mod::ContractId {
-        value: target_id.into(),
-    };
-
     attacker_instance
-        .launch_thwarted_attack_1(sway_target_id)
+        .launch_thwarted_attack_1(target_id)
         .set_contracts(&[target_id])
         .call()
         .await
@@ -62,12 +54,8 @@ async fn can_block_cross_function_reentrancy() {
     let (attacker_instance, _) = get_attacker_instance(provider.clone(), wallet.clone()).await;
     let (_, target_id) = get_target_instance(provider, wallet).await;
 
-    let sway_target_id = attackercontract_mod::ContractId {
-        value: target_id.into(),
-    };
-
     attacker_instance
-        .launch_thwarted_attack_2(sway_target_id)
+        .launch_thwarted_attack_2(target_id)
         .set_contracts(&[target_id])
         .call()
         .await
@@ -80,12 +68,8 @@ async fn can_call_guarded_function() {
     let (attacker_instance, _) = get_attacker_instance(provider.clone(), wallet.clone()).await;
     let (_, target_id) = get_target_instance(provider, wallet).await;
 
-    let sway_target_id = attackercontract_mod::ContractId {
-        value: target_id.into(),
-    };
-
     let result = attacker_instance
-        .innocent_call(sway_target_id)
+        .innocent_call(target_id)
         .set_contracts(&[target_id])
         .call()
         .await
