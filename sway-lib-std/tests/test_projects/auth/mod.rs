@@ -60,6 +60,26 @@ async fn msg_sender_from_contract() {
     assert_eq!(result.value, true);
 }
 
+#[tokio::test]
+async fn can_get_coins_owner() {
+    let (auth_instance, auth_id, caller_instance, caller_id, _) = get_contracts().await;
+
+    let auth_sway_id = authcallercontract_mod::ContractId {
+        value: auth_id.into(),
+    };
+/// https://github.com/FuelLabs/ETHDubai-2022-Workshop/blob/85780aab4efd1bc80baed867430b7de6d7042157/exercise4/solution/swayswap_contract/tests/harness.rs#L39
+///
+    let result = auth_instance
+        .get_coins_owner()
+        // .call_params(CallParameters::new(Some(11), None)) ?
+        .append_variable_outputs(1)
+        .call()
+        .await
+        .unwrap();
+
+
+}
+
 async fn get_contracts() -> (
     AuthContract,
     ContractId,
