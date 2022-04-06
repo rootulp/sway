@@ -55,7 +55,7 @@ pub fn msg_sender() -> Result<Sender, AuthError> {
 
 /// Get the owner of the inputs (of type `InputCoin`) to a TransactionScript,
 /// if they all share the same owner.
-fn get_coins_owner() -> Result<Sender, AuthError> {
+pub fn get_coins_owner() -> Result<Sender, AuthError> {
     let target_input_type = 0u8;
     let inputs_count = tx_inputs_count();
 
