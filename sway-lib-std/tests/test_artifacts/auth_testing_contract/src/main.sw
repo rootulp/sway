@@ -47,4 +47,8 @@ impl AuthTesting for Contract {
 
         ret
     }
+
+    fn get_coins_owner() -> Result<Sender, AuthError> {
+        get_coins_owner()
+    }
 }
