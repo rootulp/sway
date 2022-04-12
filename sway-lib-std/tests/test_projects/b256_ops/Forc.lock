@@ -1,0 +1,12 @@
+[[package]]
+name = 'b256_ops'
+dependencies = ['std git+https://github.com/FuelLabs/sway?branch=master#a39ec9507ed1eecf0fb4b05ae44d01d87953adb4']
+
+[[package]]
+name = 'core'
+dependencies = []
+
+[[package]]
+name = 'std'
+source = 'git+https://github.com/FuelLabs/sway?branch=master#a39ec9507ed1eecf0fb4b05ae44d01d87953adb4'
+dependencies = ['core']
