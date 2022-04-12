@@ -53,7 +53,7 @@ pub fn and_b256(val: b256, other: b256) -> b256 {
     let other_word_3 = load_word_3(other);
     let other_word_4 = load_word_4(other);
 
-    // perform `and` op on each corresponding pair of words
+    // perform `AND` op on each corresponding pair of words
     let word_1 = and(value_word_1, other_word_1);
     let word_2 = and(value_word_2, other_word_2);
     let word_3 = and(value_word_3, other_word_3);
@@ -61,16 +61,10 @@ pub fn and_b256(val: b256, other: b256) -> b256 {
 
     // rebuild a single b256 value with the 4 words resulting from the AND ops:
     asm(w1: word_1, w2: word_2, w3: word_3, w4: word_4, res) {
-        // move res sp;
-        // cfei i32;
         sw res w1 i0;
-        // addi r2 r1 i8;
         sw res w2 i8;
-        // addi r3 r2 i8;
         sw res w3 i16;
-        // addi r4 r3 i8;
         sw res w4 i24;
-        // mcpi res r1 i32;
         res: b256
     }
 
