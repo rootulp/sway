@@ -40,7 +40,7 @@ pub fn and(value: u64, other: u64) -> u64 {
 
 impl b256 {
 // Registers are 64 bits (8 bytes) wide. Words are the same width as registers.
-pub fn b256_and(val: b256, other: b256) -> b256 {
+pub fn and_b256(val: b256, other: b256) -> b256 {
     // split value into 4 words
     let value_word_1 = load_word_1(val);
     let value_word_2 = load_word_2(val);
@@ -76,12 +76,12 @@ pub fn b256_and(val: b256, other: b256) -> b256 {
 
 }
 
-// pub fn b256_or(val: self, bits: u64) -> Self {}
+// pub fn or_b256(val: self, bits: u64) -> Self {}
 
-// pub fn b256_xor(val: self, bits: u64) -> Self {}
+// pub fn xor_b256(val: self, bits: u64) -> Self {}
 
-// pub fn shift_l(val: self, bits: u64) -> Self {}
+// pub fn lsh_b256(val: self, bits: u64) -> Self {}
 
-// pub fn shift_r(val: self, bits: u64) -> Self {}
+// pub fn rsh_b256(val: self, bits: u64) -> Self {}
 
 }

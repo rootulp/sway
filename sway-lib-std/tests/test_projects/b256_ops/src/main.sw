@@ -9,6 +9,6 @@ fn main() -> bool {
     let val_1 = 0x0000000000000000000000000000000000000000000000000000000000000001;
 
     // assert(val_1.b256_and(val_0) == val_0);
-    assert(val_1.b256_and(val_1) == val_1);
+    assert(val_1.and_b256(val_1) == val_1);
     true
 }
