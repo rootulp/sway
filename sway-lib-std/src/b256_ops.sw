@@ -20,26 +20,6 @@ impl u64 {
     }
 }
 
-pub trait Shiftable {
-    fn lsh(self, other: Self) -> Self;
-    fn rsh(self, other: Self) -> Self;
-}
-
-impl Shiftable for u64 {
-    fn lsh(self, other: Self) -> Self {
-        asm(r1: self, r2: other, r3) {
-            sll r3 r1 r2;
-            r3: u64
-        }
-    }
-    fn rsh(self, other: Self) -> Self {
-        asm(r1: self, r2: other, r3) {
-            srl r3 r1 r2;
-            r3: u64
-        }
-    }
-}
-
 impl b256 {
     pub fn and_b256(val: self, other: Self) -> Self {
         let (value_word_1, value_word_2, value_word_3, value_word_4) = decompose_b256_to_words(val);
@@ -104,8 +84,8 @@ pub fn decompose_b256_to_words(val: b256) -> (u64, u64, u64, u64) {
 }
 
 // Build a single b256 value from 4 words.
-pub fn compose_b256_from_words(word_1: u64, word_2: u64, word_3: u64, word_3: u64) -> b256 {
-        asm(w1: word_1, w2: word_2, w3: word_3, w4: word_3, res) {
+pub fn compose_b256_from_words(word_1: u64, word_2: u64, word_3: u64, word_4: u64) -> b256 {
+        asm(w1: word_1, w2: word_2, w3: word_3, w4: word_4, res) {
             sw res w1 i0;
             sw res w2 i8;
             sw res w3 i16;
