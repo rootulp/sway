@@ -1,6 +1,9 @@
 [[package]]
 name = 'b256_ops'
-dependencies = ['std']
+dependencies = [
+    'core',
+    'std',
+]
 
 [[package]]
 name = 'core'

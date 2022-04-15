@@ -6,3 +6,4 @@ name = "b256_ops"
 
 [dependencies]
 std = { path = "../../../" }
+core = {path = "../../../../sway-lib-core"}
