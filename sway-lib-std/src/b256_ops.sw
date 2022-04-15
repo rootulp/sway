@@ -2,7 +2,7 @@ library b256_ops;
 
 use ::panic::panic;
 use ::chain::log_u64;
-use ::context::registers::overflow;
+
 
 pub trait Shiftable {
     fn lsh(self, other: Self) -> Self;
@@ -89,8 +89,7 @@ impl b256 {
         let (word_3, overflow_3) = shift_left_and_preserve_overflow(w3, n);
         let (word_4, overflow_4) = shift_left_and_preserve_overflow(w4, n);
 
-
-        // try using ADD instead of binary_or
+        // Use ADD or binary_or, whichever is cheaper
         let w1_shifted = if overflow_2 != 0 {
             word_1.binary_or(overflow_2)
         } else {
@@ -107,6 +106,35 @@ impl b256 {
             word_3
         };
         let w4_shifted = word_4.lsh(n);
+
+        compose(w1_shifted, w2_shifted, w3_shifted, w4_shifted)
+    }
+
+    pub fn rsh_b256(val: self, n: u64) -> Self {
+        let (w1, w2, w3, w4) = decompose(val);
+
+        let (word_1, overflow_1) = shift_right_and_preserve_overflow(w1, n);
+        let (word_2, overflow_2) = shift_right_and_preserve_overflow(w2, n);
+        let (word_3, overflow_3) = shift_right_and_preserve_overflow(w3, n);
+        let (word_4, overflow_4) = shift_right_and_preserve_overflow(w4, n);
+
+        // Use ADD or binary_or, whichever is cheaper
+        let w4_shifted = if overflow_3 != 0 {
+            word_4.binary_or(overflow_3)
+        } else {
+            word_4
+        };
+        let w3_shifted = if overflow_2 != 0 {
+            word_3.binary_or(overflow_2)
+        } else {
+            word_3
+        };
+        let w2_shifted = if overflow_1 != 0 {
+            word_2.binary_or(overflow_1)
+        } else {
+            word_2
+        };
+        let w1_shifted = word_1.rsh(n);
 
         compose(w1_shifted, w2_shifted, w3_shifted, w4_shifted)
     }
@@ -148,23 +176,44 @@ const F_WRAPPING = 2;
 
 pub fn shift_left_and_preserve_overflow(word: u64, shift_by: u64) -> (u64, u64) {
     let cache = word;
+    // Ideally this would return a tuple of (shifted, overflow)
+    // Tracked here: https://github.com/FuelLabs/sway/issues/1274
     let shifted = asm(res, r1: word, r2: shift_by, r3: 2) {
        sll res r1 r2;
        res: u64
     };
 
-    // let of = overflow();
+    // Plan A ( I think that `$of` is cleared after the asm block above returns, so this probably won't work ! )
+    let of = overflow();
 
-    let of = asm(res, r1: cache, r2: shift_by, r3: 2) {
-       flag r3; // disable panic on overflow, allowing $of to be set to a non zero value
-       sll res r1 r2;
-       of
-    };
+    // Plan B ( terrible; requires performing `sll` twice !! )
+    // let of = asm(res, r1: cache, r2: shift_by, r3: 2) {
+    //    flag r3; // disable panic on overflow, allowing $of to be set to a non zero value
+    //    sll res r1 r2;
+    //    of
+    // };
 
     (shifted, of)
 }
 
-// TODO
-// pub fn rsh_b256(val: self, bits: u64) -> Self {}
-// pub fn or_b256(val: self, bits: u64) -> Self {}
-// pub fn xor_b256(val: self, bits: u64) -> Self {}
+pub fn shift_right_and_preserve_overflow(word: u64, shift_by: u64) -> (u64, u64) {
+    let cache = word;
+    // Ideally this would return a tuple of (shifted, overflow)
+    // Tracked here: https://github.com/FuelLabs/sway/issues/1274
+    let shifted = asm(res, r1: word, r2: shift_by, r3: 2) {
+       srl res r1 r2;
+       res: u64
+    };
+
+    // Plan A ( I think that `$of` is cleared after the asm block above returns, so this probably won't work ! )
+    let of = overflow();
+
+    // Plan B ( terrible; requires performing `sll` twice !! )
+    // let of = asm(res, r1: cache, r2: shift_by, r3: 2) {
+    //    flag r3; // disable panic on overflow, allowing $of to be set to a non zero value
+    //    srl res r1 r2;
+    //    of
+    // };
+
+    (shifted, of)
+}
