@@ -2,6 +2,7 @@ library b256_ops;
 
 use ::panic::panic;
 use ::chain::log_u64;
+use ::context::registers::overflow;
 
 pub trait Shiftable {
     fn lsh(self, other: Self) -> Self;
@@ -133,7 +134,7 @@ pub fn decompose(val: b256) -> (u64, u64, u64, u64) {
 
 // Build a single b256 value from 4 words.
 pub fn compose(word_1: u64, word_2: u64, word_3: u64, word_4: u64) -> b256 {
-    let mut res: b256 = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    let res: b256 = 0x0000000000000000000000000000000000000000000000000000000000000000;
     asm(w1: word_1, w2: word_2, w3: word_3, w4: word_4, result: res) {
         sw result w1 i0;
         sw result w2 i1;
@@ -146,18 +147,21 @@ pub fn compose(word_1: u64, word_2: u64, word_3: u64, word_4: u64) -> b256 {
 const F_WRAPPING = 2;
 
 pub fn shift_left_and_preserve_overflow(word: u64, shift_by: u64) -> (u64, u64) {
-    let shifted = asm(res, r1: word, r2: shift_by) {
+    let cache = word;
+    let shifted = asm(res, r1: word, r2: shift_by, r3: 2) {
        sll res r1 r2;
        res: u64
     };
 
-    let overflow = asm(res, r1: word, r2: shift_by, r3: 2) {
+    // let of = overflow();
+
+    let of = asm(res, r1: cache, r2: shift_by, r3: 2) {
        flag r3; // disable panic on overflow, allowing $of to be set to a non zero value
        sll res r1 r2;
        of
     };
 
-    (shifted, overflow)
+    (shifted, of)
 }
 
 // TODO
