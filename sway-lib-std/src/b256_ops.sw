@@ -3,7 +3,6 @@ library b256_ops;
 use ::panic::panic;
 use ::chain::log_u64;
 
-
 pub trait Shiftable {
     fn lsh(self, other: Self) -> Self;
     fn rsh(self, other: Self) -> Self;
@@ -174,46 +173,28 @@ pub fn compose(word_1: u64, word_2: u64, word_3: u64, word_4: u64) -> b256 {
 
 const F_WRAPPING = 2;
 
-pub fn shift_left_and_preserve_overflow(word: u64, shift_by: u64) -> (u64, u64) {
-    let cache = word;
-    // Ideally this would return a tuple of (shifted, overflow)
-    // Tracked here: https://github.com/FuelLabs/sway/issues/1274
-    let shifted = asm(res, r1: word, r2: shift_by, r3: 2) {
-       sll res r1 r2;
-       res: u64
+pub fn shift_left_and_preserve_overflow(word: u64, shift_amount: u64) -> (u64, u64) {
+    let mut output = (0, 0);
+    let (shifted, overflow) = asm(out: output, r1: word, r2: shift_amount, r3, r4: F_WRAPPING) {
+       flag r4;
+       sll r3 r1 r2;
+       sw out r3 i0;
+       sw out of i8;
+       out: (u64, u64)
     };
 
-    // Plan A ( I think that `$of` is cleared after the asm block above returns, so this probably won't work ! )
-    let of = overflow();
-
-    // Plan B ( terrible; requires performing `sll` twice !! )
-    // let of = asm(res, r1: cache, r2: shift_by, r3: 2) {
-    //    flag r3; // disable panic on overflow, allowing $of to be set to a non zero value
-    //    sll res r1 r2;
-    //    of
-    // };
-
-    (shifted, of)
+    (shifted, overflow)
 }
 
-pub fn shift_right_and_preserve_overflow(word: u64, shift_by: u64) -> (u64, u64) {
-    let cache = word;
-    // Ideally this would return a tuple of (shifted, overflow)
-    // Tracked here: https://github.com/FuelLabs/sway/issues/1274
-    let shifted = asm(res, r1: word, r2: shift_by, r3: 2) {
-       srl res r1 r2;
-       res: u64
+pub fn shift_right_and_preserve_overflow(word: u64, shift_amount: u64) -> (u64, u64) {
+    let mut output = (0, 0);
+    let (shifted, overflow) = asm(out: output, r1: word, r2: shift_amount, r3, r4: F_WRAPPING) {
+       flag r4;
+       srl r3 r1 r2;
+       sw out r3 i0;
+       sw out of i8;
+       out: (u64, u64)
     };
 
-    // Plan A ( I think that `$of` is cleared after the asm block above returns, so this probably won't work ! )
-    let of = overflow();
-
-    // Plan B ( terrible; requires performing `sll` twice !! )
-    // let of = asm(res, r1: cache, r2: shift_by, r3: 2) {
-    //    flag r3; // disable panic on overflow, allowing $of to be set to a non zero value
-    //    srl res r1 r2;
-    //    of
-    // };
-
-    (shifted, of)
+    (shifted, overflow)
 }
