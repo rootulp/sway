@@ -83,10 +83,10 @@ impl b256 {
     pub fn lsh_b256(val: self, n: u64) -> Self {
         let (w1, w2, w3, w4) = decompose(val);
 
-        let (word_1, overflow_1) = shift_left_and_preserve_overflow(w1, n);
-        let (word_2, overflow_2) = shift_left_and_preserve_overflow(w2, n);
-        let (word_3, overflow_3) = shift_left_and_preserve_overflow(w3, n);
-        let (word_4, overflow_4) = shift_left_and_preserve_overflow(w4, n);
+        let (word_1, overflow_1) = shift_left_with_overflow(w1, n);
+        let (word_2, overflow_2) = shift_left_with_overflow(w2, n);
+        let (word_3, overflow_3) = shift_left_with_overflow(w3, n);
+        let (word_4, overflow_4) = shift_left_with_overflow(w4, n);
 
         // Use ADD or binary_or, whichever is cheaper
         let w1_shifted = if overflow_2 != 0 {
@@ -112,10 +112,10 @@ impl b256 {
     pub fn rsh_b256(val: self, n: u64) -> Self {
         let (w1, w2, w3, w4) = decompose(val);
 
-        let (word_1, overflow_1) = shift_right_and_preserve_overflow(w1, n);
-        let (word_2, overflow_2) = shift_right_and_preserve_overflow(w2, n);
-        let (word_3, overflow_3) = shift_right_and_preserve_overflow(w3, n);
-        let (word_4, overflow_4) = shift_right_and_preserve_overflow(w4, n);
+        let (word_1, overflow_1) = shift_right_with_overflow(w1, n);
+        let (word_2, overflow_2) = shift_right_with_overflow(w2, n);
+        let (word_3, overflow_3) = shift_right_with_overflow(w3, n);
+        let (word_4, overflow_4) = shift_right_with_overflow(w4, n);
 
         // Use ADD or binary_or, whichever is cheaper
         let w4_shifted = if overflow_3 != 0 {
@@ -171,29 +171,29 @@ pub fn compose(word_1: u64, word_2: u64, word_3: u64, word_4: u64) -> b256 {
     }
 }
 
-const F_WRAPPING = 2;
+const FLAG = 2;
 
-pub fn shift_left_and_preserve_overflow(word: u64, shift_amount: u64) -> (u64, u64) {
+pub fn shift_left_with_overflow(word: u64, shift_amount: u64) -> (u64, u64) {
     let mut output = (0, 0);
-    let (shifted, overflow) = asm(out: output, r1: word, r2: shift_amount, r3, r4: F_WRAPPING) {
-       flag r4;
-       sll r3 r1 r2;
-       sw out r3 i0;
-       sw out of i8;
-       out: (u64, u64)
+    let (shifted, overflow) = asm(out: output, r1: word, r2: shift_amount, r3, r4: FLAG) {
+       flag r4;        // set the flag to allow overflow without panic
+       sll r3 r1 r2;   // shift 'word' left 'shift_amount' and put result in r3
+       sw out r3 i0;   // store the word at r4 in output + 0 bytes
+       sw out of i1;   // store the word at r4 in output + 0 bytes
+       out: (u64, u64) // return both values
     };
 
     (shifted, overflow)
 }
 
-pub fn shift_right_and_preserve_overflow(word: u64, shift_amount: u64) -> (u64, u64) {
+pub fn shift_right_with_overflow(word: u64, shift_amount: u64) -> (u64, u64) {
     let mut output = (0, 0);
-    let (shifted, overflow) = asm(out: output, r1: word, r2: shift_amount, r3, r4: F_WRAPPING) {
-       flag r4;
-       srl r3 r1 r2;
-       sw out r3 i0;
-       sw out of i8;
-       out: (u64, u64)
+    let (shifted, overflow) = asm(out: output, r1: word, r2: shift_amount, r3, r4: FLAG) {
+       flag r4;        // set the flag to allow overflow without panic
+       srl r3 r1 r2;   // shift 'word' right 'shift_amount' and put result in r3
+       sw out r3 i0;   // store the word at r4 in output + 0 bytes
+       sw out of i1;   // store the word at r4 in output + 0 bytes
+       out: (u64, u64) // return both values
     };
 
     (shifted, overflow)
